@@ -7,7 +7,7 @@
 <title>Data Platform Playbook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#0d0f0e;
@@ -31,7 +31,7 @@
   html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 18px)}
   body{
     margin:0;background:var(--bg);color:var(--text);
-    font-family:'Lora',Georgia,serif;font-size:17px;line-height:1.72;
+    font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16.5px;line-height:1.68;
     -webkit-font-smoothing:antialiased;
     background-image:radial-gradient(circle at 18% -8%, rgba(212,168,67,.05), transparent 42%),radial-gradient(circle at 92% 4%, rgba(107,170,126,.045), transparent 38%);
     background-attachment:fixed;
@@ -79,7 +79,7 @@
   .filter-count{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);margin:-10px 0 14px 2px}
   .toc-group{margin-bottom:16px}
   .toc-group > .toc-head{
-    font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    font-family:'Space Grotesk','Segoe UI',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--accent-2);margin:0 0 7px 0;padding-left:2px;
   }
   .toc-group a{
@@ -96,7 +96,7 @@
   .hero{padding:26px 0 14px;border-bottom:1px solid var(--border);margin-bottom:38px}
   .hero .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-2);margin-bottom:14px}
   .hero h1{
-    font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(34px,5vw,52px);line-height:1.02;
+    font-family:'Space Grotesk','Segoe UI',sans-serif;font-weight:700;font-size:clamp(34px,5vw,52px);line-height:1.02;
     letter-spacing:-.02em;margin:0 0 16px;color:var(--text);
   }
   .hero h1 .hl{color:var(--accent)}
@@ -110,7 +110,7 @@
   .section{padding-top:30px;margin-top:26px}
   .section-head{display:flex;align-items:baseline;gap:14px;border-left:3px solid var(--accent);padding-left:16px;margin-bottom:8px}
   .section-head .sn{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);font-weight:500}
-  .section-head h2{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(23px,3.2vw,30px);letter-spacing:-.01em;margin:0;color:var(--text)}
+  .section-head h2{font-family:'Space Grotesk','Segoe UI',sans-serif;font-weight:700;font-size:clamp(23px,3.2vw,30px);letter-spacing:-.01em;margin:0;color:var(--text)}
   .section-sub{color:var(--text-dim);font-size:14px;padding-left:19px;margin:0 0 22px}
 
   /* ---------- question card ---------- */
@@ -121,7 +121,7 @@
   .qcard::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:3px;background:linear-gradient(var(--accent),rgba(212,168,67,0));border-radius:3px;opacity:.5}
   .qhead{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
   .qbadge{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--bg);background:var(--accent);border-radius:7px;padding:5px 9px;flex:0 0 auto;letter-spacing:.02em}
-  .qcard h3{font-family:'Syne',sans-serif;font-weight:700;font-size:21px;line-height:1.28;letter-spacing:-.01em;margin:2px 0 0;color:var(--text)}
+  .qcard h3{font-family:'Space Grotesk','Segoe UI',sans-serif;font-weight:700;font-size:21px;line-height:1.28;letter-spacing:-.01em;margin:2px 0 0;color:var(--text)}
   .pills{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 18px}
   .pill{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.03em;color:var(--accent-2);border:1px solid rgba(107,170,126,.32);background:rgba(107,170,126,.06);border-radius:20px;padding:3px 10px}
 
@@ -161,7 +161,7 @@
 
   /* tables */
   .tablewrap{overflow-x:auto;margin:18px 0;border:1px solid var(--border);border-radius:10px}
-  table{border-collapse:collapse;width:100%;font-size:14px;font-family:'Lora',serif}
+  table{border-collapse:collapse;width:100%;font-size:14px;font-family:'IBM Plex Sans',sans-serif}
   thead th{
     background:var(--surface-2);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;
     letter-spacing:.05em;text-transform:uppercase;color:var(--accent-soft);text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);
@@ -202,7 +202,7 @@
 
   /* cheatsheets */
   .cheat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin-bottom:22px}
-  .cheat h3{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin:0 0 14px;color:var(--text);display:flex;align-items:center;gap:10px}
+  .cheat h3{font-family:'Space Grotesk','Segoe UI',sans-serif;font-weight:700;font-size:18px;margin:0 0 14px;color:var(--text);display:flex;align-items:center;gap:10px}
   .cheat h3 .ic{color:var(--accent)}
   .cheat ul{margin:0;padding-left:20px}
   .cheat li{margin-bottom:8px;font-size:15px}

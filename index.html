@@ -196,8 +196,21 @@
   .copy-btn.ok{color:var(--accent-2);border-color:var(--accent-2)}
 
   /* mermaid */
-  .mermaid{background:var(--surface-3);border:1px solid var(--border);border-radius:10px;padding:18px;margin:16px 0;text-align:center;overflow-x:auto}
+  .mermaid{background:var(--surface-3);border:1px solid var(--border);border-radius:10px;padding:18px;margin:16px 0;text-align:center;overflow:hidden;position:relative;touch-action:pan-y}
   .mermaid svg{max-width:100%;height:auto}
+  /* once enhanced: the svg lives in a transformed stage inside a fixed-height viewport */
+  .mermaid:has(.dgm-stage){padding:0}
+  .mermaid .dgm-stage{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;cursor:grab}
+  .mermaid .dgm-stage svg{max-width:none}
+  .mermaid.dragging .dgm-stage{cursor:grabbing}
+  .dgm-tools{position:absolute;top:9px;right:9px;z-index:6;display:flex;gap:4px;background:rgba(13,15,14,.85);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:9px;padding:4px;opacity:0;transition:opacity .15s}
+  .mermaid:hover .dgm-tools,.mermaid:focus-within .dgm-tools{opacity:1}
+  .dgm-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1;padding:0}
+  .dgm-btn:hover{color:var(--accent);border-color:var(--accent)}
+  .dgm-hint{position:absolute;left:11px;bottom:7px;z-index:5;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.03em;color:var(--text-dim);pointer-events:none;opacity:.5}
+  .mermaid:fullscreen{width:100vw;height:100vh;background:var(--bg);border:none;border-radius:0;padding:0;touch-action:none}
+  .mermaid:fullscreen .dgm-tools{opacity:1}
+  @media (hover:none){ .dgm-tools{opacity:1} }
   .dgm-cap{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);text-align:center;margin:-6px 0 18px}
 
   /* cheatsheets */
@@ -3039,7 +3052,7 @@ sequenceDiagram
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
   mermaid.initialize({
-    startOnLoad:true,
+    startOnLoad:false,
     theme:'dark',
     securityLevel:'loose',
     fontFamily:'JetBrains Mono, ui-monospace, monospace',
@@ -3065,6 +3078,127 @@ sequenceDiagram
     flowchart:{htmlLabels:true,curve:'basis',padding:14},
     sequence:{actorMargin:38,mirrorActors:false},
   });
+
+  // Render all diagrams, then make each one zoomable + fullscreen-able.
+  const ICON = {zin:'+', zout:'−', reset:'⟲', full:'⛶', exit:'⤢'};
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  function enhance(box){
+    const svg = box.querySelector('svg');
+    if(!svg) return;
+
+    // pin the svg to its intrinsic size so our scaling is predictable
+    let natW, natH;
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    if(vb && vb.width){ natW = vb.width; natH = vb.height; }
+    else { const r = svg.getBoundingClientRect(); natW = r.width; natH = r.height; }
+    svg.style.maxWidth = 'none';
+    svg.setAttribute('width', natW);
+    svg.setAttribute('height', natH);
+
+    box.style.padding = '0';   // stage is absolutely positioned; remove padding offset
+    const stage = document.createElement('div');
+    stage.className = 'dgm-stage';
+    box.insertBefore(stage, svg);
+    stage.appendChild(svg);
+
+    const tools = document.createElement('div');
+    tools.className = 'dgm-tools';
+    const mk = (k,t) => { const b=document.createElement('button'); b.className='dgm-btn'; b.type='button'; b.title=t; b.setAttribute('aria-label',t); b.textContent=ICON[k]; return b; };
+    const bIn=mk('zin','Zoom in'), bOut=mk('zout','Zoom out'), bRst=mk('reset','Reset'), bFull=mk('full','Fullscreen');
+    tools.append(bIn,bOut,bRst,bFull);
+    box.appendChild(tools);
+
+    const hint = document.createElement('div');
+    hint.className = 'dgm-hint';
+    hint.textContent = 'ctrl+scroll · drag · ⛶';
+    box.appendChild(hint);
+
+    let scale=1, tx=0, ty=0, fit=1;
+    const apply = () => { stage.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; };
+    const isFs  = () => document.fullscreenElement === box;
+
+    function sizeBox(){
+      const bw = box.clientWidth || natW;
+      const f = Math.min(1, bw / natW);
+      if(isFs()){ box.style.height='100vh'; return; }
+      const cap = Math.min(window.innerHeight*0.72, 620);
+      box.style.height = Math.min(natH*f + 26, cap) + 'px';
+    }
+    function fitView(){
+      const bw = box.clientWidth || natW, bh = box.clientHeight || natH;
+      fit = Math.min(1, bw / natW);
+      scale = fit;
+      tx = (bw - natW*scale)/2;
+      ty = (bh - natH*scale)/2;
+      apply();
+    }
+    const refit = () => { sizeBox(); fitView(); };
+    refit();
+
+    function zoomAt(px, py, factor){
+      const ns = clamp(scale*factor, fit*0.4, Math.max(fit*8, 4));
+      tx = px - (px - tx) * (ns/scale);
+      ty = py - (py - ty) * (ns/scale);
+      scale = ns; apply();
+    }
+    const ctr = () => { const r=box.getBoundingClientRect(); return [r.width/2, r.height/2]; };
+    bIn.addEventListener('click', e=>{ e.stopPropagation(); zoomAt(...ctr(), 1.3); });
+    bOut.addEventListener('click', e=>{ e.stopPropagation(); zoomAt(...ctr(), 1/1.3); });
+    bRst.addEventListener('click', e=>{ e.stopPropagation(); refit(); });
+    bFull.addEventListener('click', e=>{ e.stopPropagation(); isFs() ? document.exitFullscreen() : box.requestFullscreen && box.requestFullscreen(); });
+    tools.addEventListener('pointerdown', e=>e.stopPropagation());
+
+    // wheel: zoom only with Ctrl/Cmd (or in fullscreen) so the page still scrolls normally
+    box.addEventListener('wheel', e=>{
+      if(!e.ctrlKey && !e.metaKey && !isFs()) return;
+      e.preventDefault();
+      const r = box.getBoundingClientRect();
+      zoomAt(e.clientX-r.left, e.clientY-r.top, e.deltaY<0 ? 1.12 : 1/1.12);
+    }, {passive:false});
+
+    box.addEventListener('dblclick', e=>{
+      const r = box.getBoundingClientRect();
+      zoomAt(e.clientX-r.left, e.clientY-r.top, 1.6);
+    });
+
+    // pan + pinch via pointer events. On touch we only engage in fullscreen,
+    // so inline diagrams never trap the page scroll on mobile.
+    const pts = new Map(); let lastDist=null;
+    const engage = e => e.pointerType!=='touch' || isFs();
+    box.addEventListener('pointerdown', e=>{
+      if(!engage(e)) return;
+      box.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      box.classList.add('dragging');
+    });
+    box.addEventListener('pointermove', e=>{
+      const p = pts.get(e.pointerId); if(!p) return;
+      const dx=e.clientX-p.x, dy=e.clientY-p.y;
+      p.x=e.clientX; p.y=e.clientY;
+      if(pts.size===1){ tx+=dx; ty+=dy; apply(); }
+      else if(pts.size===2){
+        const a=[...pts.values()];
+        const dist=Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y);
+        if(lastDist){
+          const r=box.getBoundingClientRect();
+          zoomAt((a[0].x+a[1].x)/2 - r.left, (a[0].y+a[1].y)/2 - r.top, dist/lastDist);
+        }
+        lastDist=dist;
+      }
+    });
+    const up = e=>{ pts.delete(e.pointerId); if(pts.size<2) lastDist=null; if(!pts.size) box.classList.remove('dragging'); };
+    box.addEventListener('pointerup', up);
+    box.addEventListener('pointercancel', up);
+
+    document.addEventListener('fullscreenchange', ()=>{ setTimeout(refit, 60); });
+    enhance._all.push(refit);
+  }
+  enhance._all = [];
+
+  try { await mermaid.run({ querySelector:'.mermaid' }); } catch(e){ console.error('mermaid', e); }
+  document.querySelectorAll('.mermaid').forEach(enhance);
+  let rT; addEventListener('resize', ()=>{ clearTimeout(rT); rT=setTimeout(()=>enhance._all.forEach(f=>f()), 150); });
 </script>
 <script>
   // ---- mobile sidebar ----
